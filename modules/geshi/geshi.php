@@ -1959,6 +1959,8 @@ class GeSHi {
      * @since 1.0.8
      */
     protected function build_parse_cache() {
+        if (empty($this->language_data))
+            return false;
         // cache symbol regexp
         //As this is a costy operation, we avoid doing it for multiple groups ...
         //Instead we perform it for all symbols at once.
@@ -4695,7 +4697,11 @@ class GeSHi {
             // TODO: a|bb|c => [ac]|bb
             static $callback_2;
             if (!isset($callback_2)) {
-                $callback_2 = create_function('$matches', 'return "[" . str_replace("|", "", $matches[1]) . "]";');
+				// ML create_function has been removed in PHP 8--> replaced by anonymous function
+                //$callback_2 = create_function('$matches', 'return "[" . str_replace("|", "", $matches[1]) . "]";');
+				$callback_2 = function($matches) {
+					return (count($matches) > 1) ? "[" . str_replace("|", "", $matches[1]) . "]" : "[]";
+				};
             }
             $list = preg_replace_callback('#\(\?\:((?:.\|)+.)\)#', $callback_2, $list);
         }
